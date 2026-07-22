@@ -8,20 +8,25 @@ from PIL import Image
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # ============================================================================
-# CONFIGURAÇÕES DO TESSERACT
+# CONFIGURAÇÕES DE AMBIENTE (WINDOWS)
 # ============================================================================
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+import sys
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.dirname(sys.executable)
+else:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-tessdata_padrao = r'C:\Program Files\Tesseract-OCR\tessdata'
-tessdata_local = os.path.join(os.path.dirname(__file__), 'tessdata')
-TESSDATA_DIR = None
-if os.path.isdir(tessdata_local):
-    TESSDATA_DIR = tessdata_local
-elif os.path.isdir(tessdata_padrao):
-    TESSDATA_DIR = tessdata_padrao
+tess_path_local = os.path.join(base_dir, 'Tesseract-OCR', 'tesseract.exe')
+if os.path.exists(tess_path_local):
+    pytesseract.pytesseract.tesseract_cmd = tess_path_local
+    tessdata_dir = os.path.join(base_dir, 'Tesseract-OCR', 'tessdata')
+else:
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR	esseract.exe'
+    tessdata_dir = r'C:\Program Files\Tesseract-OCR	essdata'
 
-if TESSDATA_DIR:
-    os.environ['TESSDATA_PREFIX'] = TESSDATA_DIR
+if os.path.isdir(tessdata_dir):
+    os.environ['TESSDATA_PREFIX'] = tessdata_dir
+
 
 
 def extrair_identificador_documento(texto_ocr):

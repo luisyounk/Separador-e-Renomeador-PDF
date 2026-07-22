@@ -9,25 +9,24 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # ============================================================================
 # CONFIGURAÇÕES DE AMBIENTE (WINDOWS)
-# Ajuste os caminhos abaixo conforme a sua instalação.
 # ============================================================================
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-
-# Configure o diretório de tessdata para o Tesseract.
-# Prioriza a pasta local do workspace, depois a instalação padrão.
-tessdata_padrao = r'C:\Program Files\Tesseract-OCR\tessdata'
-tessdata_local = os.path.join(os.path.dirname(__file__), 'tessdata')
-TESSDATA_DIR = None
-if os.path.isdir(tessdata_local):
-    TESSDATA_DIR = tessdata_local
-elif os.path.isdir(tessdata_padrao):
-    TESSDATA_DIR = tessdata_padrao
-
-if TESSDATA_DIR:
-    os.environ['TESSDATA_PREFIX'] = TESSDATA_DIR
-    print(f'Usando tessdata em: {TESSDATA_DIR}')
+import sys
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.dirname(sys.executable)
 else:
-    print('Aviso: tessdata não encontrado. A OCR pode falhar se o idioma não estiver instalado.')
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+tess_path_local = os.path.join(base_dir, 'Tesseract-OCR', 'tesseract.exe')
+if os.path.exists(tess_path_local):
+    pytesseract.pytesseract.tesseract_cmd = tess_path_local
+    tessdata_dir = os.path.join(base_dir, 'Tesseract-OCR', 'tessdata')
+else:
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR	esseract.exe'
+    tessdata_dir = r'C:\Program Files\Tesseract-OCR	essdata'
+
+if os.path.isdir(tessdata_dir):
+    os.environ['TESSDATA_PREFIX'] = tessdata_dir
+
 
 def extrair_identificador_documento(texto_ocr):
     """
